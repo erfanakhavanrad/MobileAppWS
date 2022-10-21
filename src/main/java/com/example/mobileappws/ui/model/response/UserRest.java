@@ -1,11 +1,15 @@
 package com.example.mobileappws.ui.model.response;
 
+import java.util.List;
+
 public class UserRest {
 
     private String userID;
     private String firstName;
     private String lastName;
     private String email;
+    // If the below line is removed, then address objects won't be returned in POST method.
+    private List<AddressesRest> addresses;
 
     public String getUserID() {
         return userID;
@@ -37,5 +41,13 @@ public class UserRest {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public List<AddressesRest> getAddresses() {
+        return addresses;
+    }
+
+    public void setAddresses(List<AddressesRest> addresses) {
+        this.addresses = addresses;
     }
 }

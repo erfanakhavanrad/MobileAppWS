@@ -4,6 +4,7 @@ import org.springframework.stereotype.Component;
 
 import java.security.SecureRandom;
 import java.util.Random;
+
 @Component
 public class Utils {
     private final Random RANDOM = new SecureRandom();
@@ -12,6 +13,10 @@ public class Utils {
 //    private final int KEY_LENGTH = 256;
 
     public String generateUserId(int length) {
+        return generateRandomString(length);
+    }
+
+    public String generateAddressId(int length) {
         return generateRandomString(length);
     }
 

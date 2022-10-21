@@ -1,12 +1,13 @@
 package com.example.mobileappws.ui.controller;
 
+import com.example.mobileappws.service.AddressService;
 import com.example.mobileappws.service.UserService;
+import com.example.mobileappws.shared.dto.AddressDTO;
 import com.example.mobileappws.shared.dto.UserDto;
 import com.example.mobileappws.ui.model.request.UserDetailsRequestModel;
-import com.example.mobileappws.ui.model.response.ErrorMessages;
-import com.example.mobileappws.ui.model.response.OperationStatusModel;
-import com.example.mobileappws.ui.model.response.RequestOperationStatus;
-import com.example.mobileappws.ui.model.response.UserRest;
+import com.example.mobileappws.ui.model.response.*;
+import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -21,6 +22,9 @@ public class UserController {
 
     @Autowired
     UserService userService;
+
+    @Autowired
+    AddressService addressService;
 
 //    @GetMapping
 //    public String getUser() {
@@ -40,15 +44,19 @@ public class UserController {
             produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public UserRest createUser(@RequestBody UserDetailsRequestModel userDetailsRequestModel) {
         UserRest returnValue = new UserRest();
-
+        UserDetailsRequestModel userDetailsRequestModel1 = userDetailsRequestModel;
         if (userDetailsRequestModel.getFirstName().isEmpty())
             throw new NullPointerException(ErrorMessages.MISSING_REQUIRED_FIELD.getErrorMessage());
 //        throw new NullPointerException("The object is null");
-        UserDto userDto = new UserDto();
-        BeanUtils.copyProperties(userDetailsRequestModel, userDto);
+
+//        UserDto userDto = new UserDto();
+//        BeanUtils.copyProperties(userDetailsRequestModel, userDto);
+        ModelMapper modelMapper = new ModelMapper();
+        UserDto userDto = modelMapper.map(userDetailsRequestModel, UserDto.class);
 
         UserDto createdUser = userService.createUser(userDto);
-        BeanUtils.copyProperties(createdUser, returnValue);
+//        BeanUtils.copyProperties(createdUser, returnValue);
+        returnValue = modelMapper.map(createdUser, UserRest.class);
 
         return returnValue;
 //        System.out.println("Called");
@@ -91,9 +99,20 @@ public class UserController {
             BeanUtils.copyProperties(userDto, userModel);
             returnValue.add(userModel);
         }
-
         return returnValue;
     }
 
+    @GetMapping(path = "/{id}/addressses")
+    public List<AddressesRest> getUserAddress(@PathVariable String id) {
+        List<AddressesRest> returnValue = new ArrayList<>();
+        List<AddressDTO> addressDTO = addressService.getAddresses(id);
+
+        if (addressDTO != null && !addressDTO.isEmpty()) {
+            java.lang.reflect.Type listType = new TypeToken<List<AddressesRest>>() {
+            }.getType();
+            returnValue = new ModelMapper().map(addressDTO, listType);
+        }
+        return returnValue;
+    }
 
 }
