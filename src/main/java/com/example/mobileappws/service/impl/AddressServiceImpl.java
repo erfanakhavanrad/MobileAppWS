@@ -2,10 +2,10 @@ package com.example.mobileappws.service.impl;
 
 import com.example.mobileappws.io.entity.AddressEntity;
 import com.example.mobileappws.io.entity.UserEntity;
+import com.example.mobileappws.io.repository.AddressRepository;
 import com.example.mobileappws.io.repository.UserRepository;
 import com.example.mobileappws.service.AddressService;
 import com.example.mobileappws.shared.dto.AddressDTO;
-import com.example.mobileappws.ui.model.response.AddressesRest;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -34,6 +34,18 @@ public class AddressServiceImpl implements AddressService {
         for (AddressEntity addressEntity : addresses) {
             returnValue.add(modelMapper.map(addressEntity, AddressDTO.class));
         }
+        return returnValue;
+    }
+
+    @Override
+    public AddressDTO getAddress(String addressId) {
+
+        AddressDTO returnValue = null;
+
+        AddressEntity addressEntity = addressRepository.findAllByAddressID(addressId);
+
+        if (addressEntity != null) returnValue =  new ModelMapper().map(addressEntity, AddressDTO.class);
+
         return returnValue;
     }
 }

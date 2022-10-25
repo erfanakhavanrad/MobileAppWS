@@ -103,7 +103,7 @@ public class UserController {
     }
 
     @GetMapping(path = "/{id}/addressses")
-    public List<AddressesRest> getUserAddress(@PathVariable String id) {
+    public List<AddressesRest> getUserAddresses(@PathVariable String id) {
         List<AddressesRest> returnValue = new ArrayList<>();
         List<AddressDTO> addressDTO = addressService.getAddresses(id);
 
@@ -113,6 +113,16 @@ public class UserController {
             returnValue = new ModelMapper().map(addressDTO, listType);
         }
         return returnValue;
+    }
+
+    @GetMapping(path = "/{userId}/addressses/{addressId}")
+    public AddressesRest getUserAddress(@PathVariable String userId, @PathVariable String addressId) {
+
+        AddressDTO addressDTO = addressService.getAddress(addressId);
+
+        ModelMapper modelMapper = new ModelMapper();
+        return modelMapper.map(addressDTO,AddressesRest.class);
+
     }
 
 }
