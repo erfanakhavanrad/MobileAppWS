@@ -10,14 +10,19 @@ import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.Link;
+import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @RestController
-@RequestMapping("users") //http://localhost:8080/users
+@RequestMapping("/users") //http://localhost:8080/users
 public class UserController {
 
     @Autowired
@@ -102,8 +107,9 @@ public class UserController {
         return returnValue;
     }
 
-    @GetMapping(path = "/{id}/addressses")
-    public List<AddressesRest> getUserAddresses(@PathVariable String id) {
+    @GetMapping(path = "/{id}/addresses")
+    public CollectionModel<AddressesRest> getUserAddresses(@PathVariable String id) {
+//    public List<AddressesRest> getUserAddresses(@PathVariable String id) {
         List<AddressesRest> returnValue = new ArrayList<>();
         List<AddressDTO> addressDTO = addressService.getAddresses(id);
 
@@ -112,17 +118,72 @@ public class UserController {
             }.getType();
             returnValue = new ModelMapper().map(addressDTO, listType);
         }
-        return returnValue;
+
+        for (AddressesRest addressesRest : returnValue) {
+            Link selfLink = WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(UserController.class)
+                    .getUserAddress(id, addressesRest.getAddressID())).withSelfRel();
+            addressesRest.add(selfLink);
+        }
+
+        Link userLink = WebMvcLinkBuilder.linkTo(UserController.class).slash(id).withRel("user");
+        Link selfLink = WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(UserController.class).getUserAddresses(id)).withSelfRel();
+
+        return CollectionModel.of(returnValue, userLink, selfLink);
     }
 
-    @GetMapping(path = "/{userId}/addressses/{addressId}")
-    public AddressesRest getUserAddress(@PathVariable String userId, @PathVariable String addressId) {
+    @GetMapping(path = "/{userId}/addresses/{addressId}")
+    public EntityModel<AddressesRest> getUserAddress(@PathVariable String userId, @PathVariable String addressId) {
 
         AddressDTO addressDTO = addressService.getAddress(addressId);
 
         ModelMapper modelMapper = new ModelMapper();
-        return modelMapper.map(addressDTO,AddressesRest.class);
+        AddressesRest returnValue = modelMapper.map(addressDTO, AddressesRest.class);
 
+        // http://localhost:8080/users/{userID}/addresses/{addressID}
+        Link userLink = WebMvcLinkBuilder.linkTo(UserController.class).slash(userId).withRel("user");
+//        Link userAddressLink = WebMvcLinkBuilder.linkTo(UserController.class)
+//                .slash(userId)
+//                .slash("addresses")
+//                .withRel("addresses");
+//        Link selfLink = WebMvcLinkBuilder.linkTo(UserController.class)
+//                .slash(userId)
+//                .slash("addresses")
+//                .slash(addressId)
+//                .withSelfRel();
+//
+//        returnValue.add(userLink);
+//        returnValue.add(userAddressLink);
+//        returnValue.add(selfLink);
+
+
+        Link userAddressLink = WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(UserController.class).getUserAddresses(userId))
+//                .slash(userId)
+//                .slash("addresses")
+                .withRel("addresses");
+
+        Link selfLink = WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(UserController.class).getUserAddress(userId, addressId))
+//                .slash(userId)
+//                .slash("addresses")
+//                .slash(addressId)
+                .withSelfRel();
+
+        return EntityModel.of(returnValue, Arrays.asList(userLink, userAddressLink, selfLink));
+
+//        return returnValue;
+//        return modelMapper.map(addressDTO,AddressesRest.class);
+    }
+
+    public OperationStatusModel verifyEmailToken(@RequestParam(value = "token") String token) {
+        OperationStatusModel returnValue = new OperationStatusModel();
+        returnValue.setOperationName(RequestOperationName.VERIFY_EMAIL.name());
+
+        boolean isVerified = userService.verifyEmailToken(token);
+        if (isVerified) {
+            returnValue.setOperationResult(RequestOperationStatus.SUCCESS.name());
+        } else {
+            returnValue.setOperationResult(RequestOperationStatus.ERROR.name());
+        }
+        return returnValue;
     }
 
 }
