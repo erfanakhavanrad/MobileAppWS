@@ -4,6 +4,7 @@ import com.example.mobileappws.service.AddressService;
 import com.example.mobileappws.service.UserService;
 import com.example.mobileappws.shared.dto.AddressDTO;
 import com.example.mobileappws.shared.dto.UserDto;
+import com.example.mobileappws.ui.model.request.PasswordResetRequestModel;
 import com.example.mobileappws.ui.model.request.UserDetailsRequestModel;
 import com.example.mobileappws.ui.model.response.*;
 import org.modelmapper.ModelMapper;
@@ -173,6 +174,7 @@ public class UserController {
 //        return modelMapper.map(addressDTO,AddressesRest.class);
     }
 
+    @GetMapping(path = "/email-verification", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public OperationStatusModel verifyEmailToken(@RequestParam(value = "token") String token) {
         OperationStatusModel returnValue = new OperationStatusModel();
         returnValue.setOperationName(RequestOperationName.VERIFY_EMAIL.name());
@@ -183,6 +185,19 @@ public class UserController {
         } else {
             returnValue.setOperationResult(RequestOperationStatus.ERROR.name());
         }
+        return returnValue;
+    }
+
+    public OperationStatusModel requestReset(@RequestBody PasswordResetRequestModel passwordResetRequestModel) {
+        OperationStatusModel returnValue = new OperationStatusModel();
+
+        boolean operationResult = userService.requestPasswordReset(passwordResetRequestModel.getEmail());
+
+        returnValue.setOperationName(RequestOperationName.REQUEST_PASSWORD_NAME.name());
+        returnValue.setOperationResult(RequestOperationStatus.ERROR.name());
+
+        if (operationResult) returnValue.setOperationResult(RequestOperationStatus.SUCCESS.name());
+
         return returnValue;
     }
 
