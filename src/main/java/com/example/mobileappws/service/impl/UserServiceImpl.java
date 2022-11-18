@@ -81,6 +81,8 @@ public class UserServiceImpl implements UserService {
 
         UserDto returnValue = new UserDto();
         BeanUtils.copyProperties(userEntity, returnValue);
+
+        //returnValue.setFirstName(null); This line is used for JUnit test.
         return returnValue;
     }
 
