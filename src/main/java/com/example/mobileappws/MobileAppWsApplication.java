@@ -6,6 +6,12 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
+// TODO: 12/9/2022
+//  video 155
+//  158 till 162 must be watched and implemented.
+//  168 till 179 must be watched and implemented.
+//  189 must be watched and implemented.
+
 @SpringBootApplication
 public class MobileAppWsApplication {
 

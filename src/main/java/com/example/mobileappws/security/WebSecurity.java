@@ -26,13 +26,16 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
                 .permitAll()
                 .antMatchers(HttpMethod.GET, SecurityConstants.VERIFICATION_EMAIL_URL)
                 .permitAll()
+                .antMatchers(SecurityConstants.H2_CONSOLE)
+                .permitAll()
                 .anyRequest().authenticated().and()
 //                .addFilter(new AuthenticationFilter(authenticationManager()));
                 .addFilter(getAuthenticationFilter())
                 .addFilter(new AuthorizationFilter(authenticationManager()))
                 .sessionManagement()
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-        ;
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+        // If application isn't API based only, below line shouldn't be used at all.
+        http.headers().frameOptions().disable();
     }
 
     @Override
