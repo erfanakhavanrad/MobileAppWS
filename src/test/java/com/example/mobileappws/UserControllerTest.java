@@ -55,7 +55,7 @@ public class UserControllerTest {
         UserRest userRest = userController.getUserByID(USER_ID);
 
         assertNotNull(userRest);
-        assertEquals(USER_ID, userRest.getUserID());
+        assertEquals(USER_ID, userRest.getUserId());
         assertEquals(userDto.getFirstName(), userRest.getFirstName());
         assertEquals(userDto.getLastName(), userRest.getLastName());
         assertTrue(userDto.getAddresses().size() == userRest.getAddresses().size());

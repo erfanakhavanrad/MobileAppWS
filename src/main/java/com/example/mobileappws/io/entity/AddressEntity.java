@@ -29,7 +29,7 @@ public class AddressEntity implements Serializable {
     private String Type;
 
     @ManyToOne
-    @JoinColumn(name = "users_id")
+    @JoinColumn(name = "userid")
     private UserEntity userDetails;
 
     public Long getId

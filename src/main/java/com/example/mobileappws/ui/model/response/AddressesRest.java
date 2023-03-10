@@ -6,7 +6,8 @@ import org.springframework.hateoas.RepresentationModel;
 public class AddressesRest extends RepresentationModel<AddressesRest> {
     private String city;
     private String Country;
-    private String addressID;
+    private String addressId;
+//    private String addressID;
     private String StreetName;
     private String PostalCode;
     private String Type;
@@ -27,12 +28,20 @@ public class AddressesRest extends RepresentationModel<AddressesRest> {
         Country = country;
     }
 
-    public String getAddressID() {
-        return addressID;
+//    public String getAddressID() {
+//        return addressID;
+//    }
+//
+//    public void setAddressID(String addressID) {
+//        this.addressID = addressID;
+//    }
+
+    public String getAddressId() {
+        return addressId;
     }
 
-    public void setAddressID(String addressID) {
-        this.addressID = addressID;
+    public void setAddressId(String addressId) {
+        this.addressId = addressId;
     }
 
     public String getStreetName() {

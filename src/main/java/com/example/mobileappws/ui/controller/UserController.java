@@ -122,7 +122,7 @@ public class UserController {
 
         for (AddressesRest addressesRest : returnValue) {
             Link selfLink = WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(UserController.class)
-                    .getUserAddress(id, addressesRest.getAddressID())).withSelfRel();
+                    .getUserAddress(id, addressesRest.getAddressId())).withSelfRel();
             addressesRest.add(selfLink);
         }
 

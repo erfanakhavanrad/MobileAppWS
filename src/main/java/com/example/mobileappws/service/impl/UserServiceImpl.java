@@ -95,6 +95,7 @@ public class UserServiceImpl implements UserService {
         if (userEntity == null) throw new UsernameNotFoundException("User with userID \"" + userId + "\" not found.");
 
         BeanUtils.copyProperties(userEntity, returnValue);
+
         return returnValue;
     }
 
