@@ -91,4 +91,70 @@ public class UserRepositoryTest {
         assertTrue(userEntities.size() == 1);
     }
 
+    @Test
+    final void testFindUserByFirstName() {
+        String firstName = "Erfan";
+        List<UserEntity> usersByFirstName = userRepository.findUserByFirstName(firstName);
+        assertNotNull(usersByFirstName);
+        assertTrue(usersByFirstName.size() == 1);
+        UserEntity userEntity = usersByFirstName.get(0);
+        assertTrue(userEntity.getFirstName().equals(firstName));
+    }
+
+    @Test
+    final void testFindUserByLastName() {
+        String lastName = "Ackerm3drgrdgdggrdg34444an";
+        List<UserEntity> usersByLastName = userRepository.findUserByLastName(lastName);
+        assertNotNull(usersByLastName);
+        assertTrue(usersByLastName.size() == 1);
+        UserEntity userEntity = usersByLastName.get(0);
+        assertTrue(userEntity.getLastName().equals(lastName));
+    }
+
+
+    @Test
+    final void testFindUserByKeyword() {
+        String keyword = "34";
+        List<UserEntity> usersByKeyword = userRepository.findUserByKeyword(keyword);
+        assertNotNull(usersByKeyword);
+        assertTrue(usersByKeyword.size() == 1);
+        UserEntity userEntity = usersByKeyword.get(0);
+        assertTrue(userEntity.getLastName().contains(keyword) || userEntity.getFirstName().contains(keyword));
+    }
+
+
+    @Test
+    final void testFindUserFullNameByKeyword() {
+        String keyword = "erfan";
+        List<Object[]> users = userRepository.findUserFullNameByKeyword(keyword);
+        assertNotNull(users);
+        assertTrue(users.size() == 1);
+        Object[] user = users.get(0);
+        String userFirstName = String.valueOf(user[0]);
+        String userLastName = String.valueOf(user[1]);
+
+        assertNotNull(userFirstName);
+        assertNotNull(userLastName);
+
+        System.out.println("First name = " + userFirstName);
+        System.out.println("Last name = " + userLastName);
+    }
+
+    @Test
+    final void testUpdateUserEmailVerificationStatus() {
+        boolean newUserEmailVerificationStatus = false;
+        String userID = "pQbJEg7Clh44n4RZpJ4gBPenaa4sJf";
+
+        userRepository.updateUserEmailVerificationStatus(newUserEmailVerificationStatus, userID);
+
+        UserEntity userEntity = userRepository.findByUserId(userID);
+
+        boolean storedUserEmailVerificationStatus = userEntity.getEmailVerificationStatus();
+
+        assertTrue(newUserEmailVerificationStatus == storedUserEmailVerificationStatus);
+
+
+    }
+
+
 }
