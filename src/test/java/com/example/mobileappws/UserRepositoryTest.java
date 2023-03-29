@@ -152,8 +152,49 @@ public class UserRepositoryTest {
         boolean storedUserEmailVerificationStatus = userEntity.getEmailVerificationStatus();
 
         assertTrue(newUserEmailVerificationStatus == storedUserEmailVerificationStatus);
+    }
 
+    @Test
+    final void testFindUserEntityByUserId() {
+        String userID = "rYQA4knkBOHMnhQdAnEZYAXRoZf3uh";
+        UserEntity userEntity = userRepository.findUserEntityByUserId(userID);
 
+        assertNotNull(userEntity);
+        assertTrue(userEntity.getUserId().equals(userID));
+
+    }
+
+    @Test
+    final void testGetUserEntityFullNameByID() {
+        String userID = "pQbJEg7Clh44n4RZpJ4gBPenaa4sJf";
+        List<Object[]> records = userRepository.getUserEntityFullNameByID(userID);
+
+        assertNotNull(records);
+        assertTrue(records.size() == 1);
+
+        Object[] userDetails = records.get(0);
+
+        String firstName = String.valueOf(userDetails[0]);
+        String lastName = String.valueOf(userDetails[1]);
+        String email = String.valueOf(userDetails[2]);
+
+        assertNotNull(firstName);
+        assertNotNull(lastName);
+        assertNotNull(email);
+    }
+
+    @Test
+    final void testUpdateUserEntityEmailVerificationStatus() {
+        boolean newEmailVerificationStatus = false;
+        String userID = "pQbJEg7Clh44n4RZpJ4gBPenaa4sJf";
+
+        userRepository.updateUserEntityEmailVerificationStatus(newEmailVerificationStatus, userID);
+
+        UserEntity storedUserDetails = userRepository.findByUserId(userID);
+
+        boolean storedEmailVerificationStatus = storedUserDetails.getEmailVerificationStatus();
+
+        assertTrue(storedEmailVerificationStatus == newEmailVerificationStatus);
     }
 
 
