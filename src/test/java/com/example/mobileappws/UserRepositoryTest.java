@@ -185,8 +185,10 @@ public class UserRepositoryTest {
 
     @Test
     final void testUpdateUserEntityEmailVerificationStatus() {
-        boolean newEmailVerificationStatus = false;
-        String userID = "pQbJEg7Clh44n4RZpJ4gBPenaa4sJf";
+        boolean newEmailVerificationStatus = true;
+        String userID = "rYQA4knkBOHMnhQdAnEZYAXRoZf3uh";
+//        String userID = "pQbJEg7Clh44n4RZpJ4gBPenaa4sJf";
+//
 
         userRepository.updateUserEntityEmailVerificationStatus(newEmailVerificationStatus, userID);
 

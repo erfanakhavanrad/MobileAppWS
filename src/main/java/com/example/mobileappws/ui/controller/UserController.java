@@ -7,6 +7,9 @@ import com.example.mobileappws.shared.dto.UserDto;
 import com.example.mobileappws.ui.model.request.PasswordResetRequestModel;
 import com.example.mobileappws.ui.model.request.UserDetailsRequestModel;
 import com.example.mobileappws.ui.model.response.*;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.BeanUtils;
@@ -37,7 +40,7 @@ public class UserController {
 //    public String getUser() {
 //        return "GET user was called.";
 //    }
-
+@ApiOperation(value = "The Get User Details Web Service Endpoint",notes = "${userController.GetUser.ApiOperation.Notes}")
     @GetMapping(path = "/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public UserRest getUserByID(@PathVariable String id) {
         UserRest returnValue = new UserRest();
@@ -94,6 +97,10 @@ public class UserController {
         return returnValue;
     }
 
+@ApiImplicitParams({
+//        @ApiImplicitParam(name = "authorization",value = "Bearer JWT Token", paramType = "header")
+        @ApiImplicitParam(name = "authorization",value = "${userController.authorizationHeader.description}", paramType = "header")
+})
     @GetMapping(produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public List<UserRest> getUsers(@RequestParam(value = "page", defaultValue = "0") int page,
                                    @RequestParam(value = "limit", defaultValue = "25") int limit) {
