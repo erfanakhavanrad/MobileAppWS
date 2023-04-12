@@ -2,6 +2,7 @@ package com.example.mobileappws.ui.controller;
 
 import com.example.mobileappws.service.AddressService;
 import com.example.mobileappws.service.UserService;
+import com.example.mobileappws.shared.Roles;
 import com.example.mobileappws.shared.dto.AddressDTO;
 import com.example.mobileappws.shared.dto.UserDto;
 import com.example.mobileappws.ui.model.request.PasswordResetRequestModel;
@@ -19,10 +20,14 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.MediaType;
+import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.access.prepost.PostAuthorize;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 
 @RestController
@@ -36,11 +41,12 @@ public class UserController {
     @Autowired
     AddressService addressService;
 
-//    @GetMapping
+    //    @GetMapping
 //    public String getUser() {
 //        return "GET user was called.";
 //    }
-@ApiOperation(value = "The Get User Details Web Service Endpoint",notes = "${userController.GetUser.ApiOperation.Notes}")
+    @ApiOperation(value = "The Get User Details Web Service Endpoint", notes = "${userController.GetUser.ApiOperation.Notes}")
+    @PostAuthorize("hasRole('ADMIN') or returnObject.userId == principal.userId")
     @GetMapping(path = "/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public UserRest getUserByID(@PathVariable String id) {
         UserRest returnValue = new UserRest();
@@ -63,6 +69,8 @@ public class UserController {
 //        BeanUtils.copyProperties(userDetailsRequestModel, userDto);
         ModelMapper modelMapper = new ModelMapper();
         UserDto userDto = modelMapper.map(userDetailsRequestModel, UserDto.class);
+        userDto.setRoles(new HashSet<>(Arrays.asList(Roles.ROLE_USER.name())));
+
 
         UserDto createdUser = userService.createUser(userDto);
 //        BeanUtils.copyProperties(createdUser, returnValue);
@@ -73,6 +81,9 @@ public class UserController {
 //        return null;
     }
 
+    //    @PreAuthorize("hasAuthority('DELTE_AUTHORITY')")
+    @PreAuthorize("hasRole('ADMIN') or #id == principal.userId")
+    @Secured("ROLES_ADMIN") // This name should be same as where it's saved originally.
     @PutMapping(path = "/{id}", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE},
             produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public UserRest updateUser(@PathVariable String id, @RequestBody UserDetailsRequestModel userDetailsRequestModel) {
@@ -97,10 +108,10 @@ public class UserController {
         return returnValue;
     }
 
-@ApiImplicitParams({
+    @ApiImplicitParams({
 //        @ApiImplicitParam(name = "authorization",value = "Bearer JWT Token", paramType = "header")
-        @ApiImplicitParam(name = "authorization",value = "${userController.authorizationHeader.description}", paramType = "header")
-})
+            @ApiImplicitParam(name = "authorization", value = "${userController.authorizationHeader.description}", paramType = "header")
+    })
     @GetMapping(produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public List<UserRest> getUsers(@RequestParam(value = "page", defaultValue = "0") int page,
                                    @RequestParam(value = "limit", defaultValue = "25") int limit) {

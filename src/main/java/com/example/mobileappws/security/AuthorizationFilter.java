@@ -1,5 +1,7 @@
 package com.example.mobileappws.security;
 
+import com.example.mobileappws.io.entity.UserEntity;
+import com.example.mobileappws.io.repository.UserRepository;
 import io.jsonwebtoken.Jwts;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -11,12 +13,14 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.ArrayList;
 
 public class AuthorizationFilter extends BasicAuthenticationFilter {
 
-    public AuthorizationFilter(AuthenticationManager authenticationManager) {
+    private final UserRepository userRepository;
+
+    public AuthorizationFilter(AuthenticationManager authenticationManager, UserRepository userRepository) {
         super(authenticationManager);
+        this.userRepository = userRepository;
     }
 
     @Override
@@ -30,7 +34,7 @@ public class AuthorizationFilter extends BasicAuthenticationFilter {
         }
         UsernamePasswordAuthenticationToken authentication = getAuthentication(request);
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        chain.doFilter(request,response);
+        chain.doFilter(request, response);
     }
 
     private UsernamePasswordAuthenticationToken getAuthentication(HttpServletRequest request) {
@@ -45,7 +49,13 @@ public class AuthorizationFilter extends BasicAuthenticationFilter {
                     .getSubject();
 
             if (user != null) {
-                return new UsernamePasswordAuthenticationToken(user, null, new ArrayList<>());
+                UserEntity userEntity = userRepository.findByEmail(user);
+
+                if (userEntity == null) return null;
+
+                UserPrincipal userPrincipal = new UserPrincipal(userEntity);
+//                return new UsernamePasswordAuthenticationToken(user, null, userPrincipal.getAuthorities());
+                return new UsernamePasswordAuthenticationToken(userPrincipal, null, userPrincipal.getAuthorities());
             }
             return null;
 

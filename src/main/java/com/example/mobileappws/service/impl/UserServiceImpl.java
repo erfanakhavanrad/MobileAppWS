@@ -2,9 +2,12 @@ package com.example.mobileappws.service.impl;
 
 import com.example.mobileappws.exceptions.UserServiceException;
 import com.example.mobileappws.io.entity.PasswordResetTokenEntity;
+import com.example.mobileappws.io.entity.RoleEntity;
 import com.example.mobileappws.io.entity.UserEntity;
 import com.example.mobileappws.io.repository.PasswordResetTokenRepository;
+import com.example.mobileappws.io.repository.RoleRepository;
 import com.example.mobileappws.io.repository.UserRepository;
+import com.example.mobileappws.security.UserPrincipal;
 import com.example.mobileappws.service.UserService;
 import com.example.mobileappws.shared.Utils;
 import com.example.mobileappws.shared.dto.AddressDTO;
@@ -16,13 +19,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 
 @Service
@@ -40,10 +44,14 @@ public class UserServiceImpl implements UserService {
     @Autowired
     PasswordResetTokenRepository passwordResetTokenRepository;
 
+    @Autowired
+    RoleRepository roleRepository;
+
     @Override
     public UserDto createUser(UserDto user) {
 
-        if (userRepository.findByEmail(user.getEmail()) != null) throw new UserServiceException("Record already exists");
+        if (userRepository.findByEmail(user.getEmail()) != null)
+            throw new UserServiceException("Record already exists");
 
         for (int i = 0; i < user.getAddresses().size(); i++) {
             AddressDTO address = user.getAddresses().get(i);
@@ -63,6 +71,16 @@ public class UserServiceImpl implements UserService {
         userEntity.setEncryptedPassword(bCryptPasswordEncoder.encode(user.getPassword()));
         userEntity.setEmailVerificationToken(utils.generateEmailVerificationToken(publicUserId));
         userEntity.setEmailVerificationStatus(false);
+
+        // Set Roles
+        Collection<RoleEntity> roleEntities = new HashSet<>();
+        for (String role : user.getRoles()) {
+            RoleEntity roleEntity = roleRepository.findByName(role);
+            if (roleEntity != null) roleEntities.add(roleEntity);
+        }
+
+        userEntity.setRoles(roleEntities);
+
 
         UserEntity storedUserDetails = userRepository.save(userEntity);
 
@@ -190,10 +208,12 @@ public class UserServiceImpl implements UserService {
         UserEntity userEntity = userRepository.findByEmail(email);
         if (userEntity == null) throw new UsernameNotFoundException(email);
 
-        return new User(userEntity.getEmail(), userEntity.getEncryptedPassword(),
-                userEntity.getEmailVerificationStatus(),
-                true, true,
-                true, new ArrayList<>());
+        return new UserPrincipal(userEntity);
+//        return new User(userEntity.getEmail(), userEntity.getEncryptedPassword(),
+//                userEntity.getEmailVerificationStatus(),
+//                true, true,
+//                true, new ArrayList<>());
+
 
 //        return new User(userEntity.getEmail(), userEntity.getEncryptedPassword(), new ArrayList<>());
     }

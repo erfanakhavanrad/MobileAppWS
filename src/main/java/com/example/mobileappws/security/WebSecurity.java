@@ -1,9 +1,11 @@
 package com.example.mobileappws.security;
 
+import com.example.mobileappws.io.repository.UserRepository;
 import com.example.mobileappws.service.UserService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -15,14 +17,17 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
 
+@EnableGlobalMethodSecurity(securedEnabled = true, prePostEnabled = true)
 @EnableWebSecurity
 public class WebSecurity extends WebSecurityConfigurerAdapter {
     private final UserService userDetailsService;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
+    private final UserRepository userRepository;
 
-    public WebSecurity(UserService userDetailsService, BCryptPasswordEncoder bCryptPasswordEncoder) {
+    public WebSecurity(UserService userDetailsService, BCryptPasswordEncoder bCryptPasswordEncoder, UserRepository userRepository) {
         this.userDetailsService = userDetailsService;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
+        this.userRepository = userRepository;
     }
 
     @Override
@@ -38,10 +43,13 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
                 .permitAll()
                 .antMatchers("/v2/api-docs", "/configuration/**", "/swagger*/**", "/webjars/**")
                 .permitAll()
+                .antMatchers(HttpMethod.DELETE, "/users/**").hasRole("ADMIN")
+                .antMatchers(HttpMethod.DELETE, "/users/**").hasAnyRole("ADMIN", "SUPER_ADMIN")
+                .antMatchers(HttpMethod.DELETE, "users/**").hasAnyAuthority("DELETE_AUTHORITY")
                 .anyRequest().authenticated().and()
 //                .addFilter(new AuthenticationFilter(authenticationManager()));
                 .addFilter(getAuthenticationFilter())
-                .addFilter(new AuthorizationFilter(authenticationManager()))
+                .addFilter(new AuthorizationFilter(authenticationManager(), userRepository))
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
         // If application isn't API based only, below line shouldn't be used at all.
